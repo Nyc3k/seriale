@@ -1,0 +1,31 @@
+buildscript {
+    ext.kotlin_version = '1.6.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Dodaj tę linię
+        classpath 'com.android.tools.build:gradle:8.0.0'  // Dodaj tę linię, aby zaktualizować Android Gradle Plugin
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"  // Dodaj tę linię, aby zaktualizować wtyczkę Kotlin
+        classpath 'com.google.gms:google-services:4.3.10' // Sprawdź najnowszą wersję na stronie Firebase
+    }
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
