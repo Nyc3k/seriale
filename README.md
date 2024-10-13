@@ -1,3 +1,3 @@
 ## Prezentacja aplikacji
 
-![Prezentacja aplikacji](\assets\gif\jeden.gif)
+![Prezentacja aplikacji](assets\gif\jeden.gif)
