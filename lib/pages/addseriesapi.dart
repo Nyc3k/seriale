@@ -5,6 +5,7 @@ import 'package:kajecik/components/api_response.dart';
 import 'package:kajecik/components/api_service.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/setrating.dart';
+import 'package:kajecik/globals.dart';
 
 import '../components/serial.dart';
 import '../components/tableText.dart';
@@ -226,7 +227,8 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
     
     widget.formClick();
   } else {
-    widget.firestore.collection('seriale').add({
+    String collection = Globals.mode.value == 0 ? 'seriale' : 'movies';
+    widget.firestore.collection(collection).add({
             'isWatched' : widget.isWatched,
             'apiId' : widget.newSerial.apiId,
             'title' : widget.newSerial.title,

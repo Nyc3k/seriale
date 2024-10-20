@@ -11,7 +11,7 @@ class Serial {
   String? imageUrl;
   String? imageUrl2;
   double? rating;
-  int? sesons;
+  int? sesons = 0;
   String? notes;
   String? trailerUrl;
   Timestamp? createdAt;

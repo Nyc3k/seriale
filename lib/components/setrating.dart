@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/multichooser.dart';
+import 'package:kajecik/globals.dart';
 import '../components/serial.dart';
 import '../components/tableText.dart';
 
@@ -46,7 +47,8 @@ class _addAPIandRankingState extends State<SetRanking> {
   @override
   void initState() {
     super.initState();
-    if (widget.addSesson) {
+    if (widget.newSerial.sesons != null) {
+      if (widget.addSesson) {
       sliderMax = widget.newSerial.sesons! + 1;
     } else {
       sliderMax = widget.newSerial.sesons!.toDouble();
@@ -58,6 +60,8 @@ class _addAPIandRankingState extends State<SetRanking> {
     } else{
       _sliderValue = 1.0;
     }
+    }
+    
     
   }
 
@@ -85,12 +89,12 @@ class _addAPIandRankingState extends State<SetRanking> {
             children: [
               const SizedBox(height: 25.0),
               Text( widget.newSerial.title , style: const TextStyle(fontSize: 25),),
-              Text('dostępny w ${widget.newSerial.platforms} \n tagi: ${widget.newSerial.apiGenre} ilość sezonów ${widget.newSerial.sesons}'),
+              //Text('dostępny w ${widget.newSerial.platforms} \n tagi: ${widget.newSerial.apiGenre} ilość sezonów ${widget.newSerial.sesons}'),
               const SizedBox(height: 16.0),             
               Form(
                 child: Column(
                     children: [
-                      Column(
+                      if (Globals.mode.value == 0 ) Column(
                         children: [
                           TableText( textWTabeli: 'Liczba obejrzanych sezonów: ${_sliderValue.toInt()}'),
                           Slider(
@@ -226,7 +230,8 @@ class _addAPIandRankingState extends State<SetRanking> {
                 _sliderValue == widget.newSerial.sesons ? sessontowatch = false: sessontowatch = true;
                 if (widget.isNew) {
                   dialogText = 'Serial został dodany';
-                  widget.firestore.collection('seriale').add({
+                  String collection = Globals.mode.value == 0 ? 'seriale' : 'movies';
+                  widget.firestore.collection(collection).add({
                           'isWatched' : widget.isWatched,
                           'apiId' : widget.newSerial.apiId,
                           'title' : widget.newSerial.title,

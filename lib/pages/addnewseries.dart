@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/multichooser.dart';
+import 'package:kajecik/globals.dart';
 import 'package:kajecik/pages/addseriesapi.dart';
 import '../components/serial.dart';
 
@@ -55,7 +56,7 @@ class _AddNewSeriesState extends State<AddNewSeries> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dodaj nowy serial', style: TextStyle(
+        title: const Text('Dodaj nowy Tytuł', style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold
         )),
@@ -134,7 +135,7 @@ class _AddNewSeriesState extends State<AddNewSeries> {
               
               const SizedBox(height: 20.0),
               
-              TextFormField(
+              if (Globals.mode.value == 0) TextFormField(
                 controller: _sezonsController,
                 decoration: InputDecoration(
                   labelText: 'Ilość sezonów', 
@@ -181,7 +182,9 @@ class _AddNewSeriesState extends State<AddNewSeries> {
               ButtonMy(text: 'Dodaj', onPressed: () {
                   _formKey.currentState!.validate();
                   _formKey.currentState!.save();
-                  Serial newSerial = Serial(isWatched: _isWatched, title: _titleController.text , platforms: _selectedPlatforms, sesons: int.parse(_sezonsController.text), notes: _notesController.text);
+                  Serial newSerial = Globals.mode.value == 0 ? 
+                    Serial(isWatched: _isWatched, title: _titleController.text , platforms: _selectedPlatforms, sesons: int.parse(_sezonsController.text), notes: _notesController.text):
+                    Serial(isWatched: _isWatched, title: _titleController.text , platforms: _selectedPlatforms, notes: _notesController.text);
                   
 
                   Navigator.push(context, MaterialPageRoute(builder: (context) => AddAPIandRanking(
@@ -204,7 +207,7 @@ class _AddNewSeriesState extends State<AddNewSeries> {
     );
   }
 }
-
+// TO JEST DZIWNE \/
 class MultiSelectChip extends StatefulWidget {
   final List<String> reportList;
   final Function(List<String>) onSelectionChanged;

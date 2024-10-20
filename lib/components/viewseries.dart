@@ -3,6 +3,7 @@ import 'package:kajecik/components/multichooser.dart';
 import 'package:kajecik/components/raport.dart';
 import 'package:kajecik/components/serieslist.dart';
 import 'package:kajecik/components/filtrcard.dart';
+import 'package:kajecik/globals.dart';
 import 'serial.dart';
 
 class ViewSeries extends StatefulWidget {
@@ -89,11 +90,7 @@ void filterItems() {
   }
   void changeOfLook(){
     setState(() {
-      if (opcja == 2) {
-        opcja = 1;
-      }else{
-        opcja++;
-      }
+      Globals.changeMode();
     });
   }
   void _startSearch() {
@@ -224,7 +221,9 @@ void filterItems() {
                       ),
                   )
           : GestureDetector(
-            child: Text(barTitle, 
+            child: Text(
+              Globals.mode.toString(),
+              //barTitle, 
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold

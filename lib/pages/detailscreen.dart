@@ -124,6 +124,7 @@ class DetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(serial.platforms);
     String tekstJeden = ' ';
     // print('${DateFormat('dd MMMM yyyy, HH:mm').format(serial.wachedAt!.toDate())} > ${DateFormat('dd MMMM yyyy, HH:mm').format(DateTime(2024,8,6,23)).toString()} => ${serial.wachedAt!.toDate().isAfter(DateTime(2024,8,6,23))} ');
     if (serial.releaseYear != null) tekstJeden=tekstJeden+serial.releaseYear.toString();
@@ -228,7 +229,7 @@ class DetailScreen extends StatelessWidget {
                               runSpacing: 5,
                               children: serial.apiGenre!.map((gener) => GenerCard(title: gener, onTap: null)).toList()
                             ),
-                            Padding(
+                            if (!serial.platforms.contains('Nie_Wiem')) Padding(
                               padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                               child: Row(
                                 children: platformImages,
