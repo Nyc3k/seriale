@@ -58,7 +58,7 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
         
       });
     } catch (e) {
-      //print('_fetchMovies SIĘ WYWALIŁO $e');
+      print('_fetchMovies SIĘ WYWALIŁO $e');
     } finally {
       setState(() {
         _isLoading = false;

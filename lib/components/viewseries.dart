@@ -9,11 +9,12 @@ class ViewSeries extends StatefulWidget {
   final List<Serial> series;
   final String appBarTitle;
   final List<String> tags;
+  final List<String> seriesOrder;
   final List<Serial> watchedSeries;
   final bool withNewSessons;
 
 
-  const ViewSeries({required this.series, super.key, required this.appBarTitle, required this.tags, required this.watchedSeries, required this.withNewSessons});
+  const ViewSeries({required this.series, super.key, required this.appBarTitle, required this.tags, required this.watchedSeries, required this.withNewSessons, required this.seriesOrder});
 
   @override
   State<ViewSeries> createState() => _ViewSeriesState();
@@ -307,7 +308,8 @@ void filterItems() {
             ),
           ),
         ),          
-        Expanded(  child: Serieslist(serials: filteredItems, watchedSeries: widget.watchedSeries, opcja: opcja, withNewSessons: widget.withNewSessons, tags: widget.tags))
+        Expanded(  child: Serieslist(serials: filteredItems, watchedSeries: widget.watchedSeries, opcja: opcja, withNewSessons: widget.withNewSessons, tags: widget.tags, seriesOrder: widget.seriesOrder,),
+        ),
       ],
     ),
     );

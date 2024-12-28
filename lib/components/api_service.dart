@@ -1,20 +1,23 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:kajecik/components/api_response.dart';
+import 'package:kajecik/apikey.dart';
 
 
 class ApiService {
-  final String apiKey = '*******';
+  final String apiKey = ApiKey().apiKey;
 
   Future<List<ApiResponse>> fetchSearch(String query) async {
+    //print('https://api.watchmode.com/v1/autocomplete-search/?apiKey=$apiKey&search_value=$query&search_type=1');
     final response = await http.get(Uri.parse(
         'https://api.watchmode.com/v1/autocomplete-search/?apiKey=$apiKey&search_value=$query&search_type=1'));
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body)['results'];
       return jsonResponse.map((series) => ApiResponse.fromJson(series)).toList();
     } else {
-      throw Exception('Failed to load tv series');
+      throw Exception('Failed to load tv series ${response.statusCode}');
     }
   }
 
@@ -29,7 +32,7 @@ class ApiService {
       Map<String,dynamic> jsonResponse = json.decode(response.body);
       return jsonResponse;
     } else {
-      throw Exception('Failed to load tv series');
+      throw Exception('Failed to load tv series ${response.statusCode}');
     }
   }
 
@@ -69,7 +72,7 @@ Future<Map<String,dynamic>> fetchImdbApi(String imdbId, GraphQLClient client) as
     final QueryResult result = await client.query(options);
 
     if (result.hasException) {
-      //print('Error fetching users: ${result.exception.toString()}');
+      print('Error fetching users: ${result.exception.toString()}');
       throw Exception('Failed to load tv series');
     }
 

@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/multichooser.dart';
+import 'package:provider/provider.dart';
 import '../components/serial.dart';
+import '../components/serial_provider.dart';
 import '../components/tableText.dart';
 
 class SetRanking extends StatefulWidget {
@@ -41,7 +45,7 @@ class _addAPIandRankingState extends State<SetRanking> {
   bool _isLoading = false;
   double _sliderValue = 1.0;
   double sliderMax = 1;
-  
+  int selectedIndex = 0;
 
   @override
   void initState() {
@@ -64,10 +68,14 @@ class _addAPIandRankingState extends State<SetRanking> {
   @override
   Widget build(BuildContext context) {
 
-    List<Serial> filteredList = filterTags.isEmpty
-        ? widget.series
-        : widget.series.where((series) => series.apiGenre!.any((tag) => filterTags.contains(tag))).toList();
 
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+    List<Serial> filteredList = filterTags.isEmpty
+        ? serialProvider.watchedSeries
+        : serialProvider.watchedSeries.where((series) => series.apiGenre!.any((tag) => filterTags.contains(tag))).toList();
+
+
+        print(filteredList);
     return _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 25, 145, 14)))
           : Scaffold(
@@ -205,7 +213,15 @@ class _addAPIandRankingState extends State<SetRanking> {
                                 DataColumn(label: TableText(textWTabeli: 'Emote')),
                               ],
                               rows: filteredList.map((item) {
-                                return DataRow(cells: [
+                                return DataRow(
+                                  //selected: selectedIndex == item.id,
+                                  onSelectChanged: (isSelected) {
+                                    setState(() {
+                                      selectedIndex = serialProvider.orderList.indexOf(item.firebaseId!);
+                                      print('Selected ID: $selectedIndex');
+                                    });
+                                  },
+                                  cells: [
                                   DataCell(TableText(textWTabeli: item.title )),
                                   DataCell(TableText(textWTabeli: item.rating.toString())),
                                   DataCell(TableText(textWTabeli: item.apiGenre!.join(', '))),
@@ -252,6 +268,13 @@ class _addAPIandRankingState extends State<SetRanking> {
                           'watchedSessons' : _sliderValue,
                           'newSesson' : sessontowatch,
                           'prority': 2
+                        }).then((value) {
+                          serialProvider.orderList.insert( selectedIndex ,value.id);
+                          widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
+                            'documentIds' : serialProvider.orderList,
+                          }).then(
+                            serialProvider.fetchSerials() as FutureOr Function(void value)
+                          );
                         });
                 }else{
                   dialogText = 'Serial został zaktalizowany';
