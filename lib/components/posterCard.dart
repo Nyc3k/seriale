@@ -25,7 +25,7 @@ class Postercard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(serial: serial, watchedSeries: watchedSeries)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(serial: serial)));
       },
       child: Container(
         padding: const EdgeInsets.all(16),

@@ -120,9 +120,9 @@ void filterItems() {
           b = temp; 
         }
         if (query == 'rating') {
-          if (a.rating == null && b.rating == null) return 0;
-          if (a.rating == null) return -1;
-          if (b.rating == null) return 1;
+          // if (a.rating == null && b.rating == null) return 0;
+          // if (a.rating == null) return -1;
+          // if (b.rating == null) return 1;
           return a.rating!.compareTo(b.rating!);
         } else if (query == 'platform') {
           return a.platforms[0].compareTo(b.platforms[0]);

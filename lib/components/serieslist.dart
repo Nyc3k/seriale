@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/posterCard.dart';
 import 'package:kajecik/components/posterminicard.dart';
 import 'package:kajecik/components/serial.dart';
 import 'package:kajecik/components/serial_provider.dart';
+import 'package:kajecik/pages/detailscreen.dart';
 import 'package:provider/provider.dart';
+import 'package:kajecik/components/listviewelement.dart';
 
 class Serieslist extends StatefulWidget {
   final List<Serial> serials;
@@ -22,6 +25,7 @@ class _SerieslistState extends State<Serieslist> {
   
 
   void _onReorder(int oldIndex, int newIndex) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
     setState(() {
       if (newIndex > oldIndex) newIndex -= 1;
       final item = widget.serials.removeAt(oldIndex);
@@ -33,6 +37,17 @@ class _SerieslistState extends State<Serieslist> {
     });
 
     // Zapisz nową kolejność w Firestore
+    FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
+        'documentIds' : widget.seriesOrder,
+      });
+      for (var i = serialProvider.orderList.length-1; i >= 0; i--) {
+        final serial = serialProvider.watchedSeries.firstWhere((element) => element.firebaseId == serialProvider.orderList[i]);
+        serialProvider.watchedSeries.remove(serial);
+        serialProvider.watchedSeries.insert(0, serial);
+      }
+    //   .then( (_) async =>
+    //   await serialProvider.fetchSerials()
+    // );
     //_updateSeriesOrder();
   }
 
@@ -46,16 +61,7 @@ class _SerieslistState extends State<Serieslist> {
               onReorder: _onReorder,
               children: [
                 for (final serial in widget.serials)
-                  ListTile(
-                    key: ValueKey(serial.firebaseId),
-                    leading: Image.network(
-                      serial.imageUrl!,
-                      fit: BoxFit.cover,
-                      height: 140,
-                    ),
-                    title: Text(serial.title),
-                    subtitle: Text('Ocena: ${serial.rating ?? "Brak"}'),
-                  ),
+                  ListViewElement(serial: serial, key: ValueKey(serial.firebaseId),),
               ],
             );
     } else {
@@ -77,3 +83,4 @@ class _SerieslistState extends State<Serieslist> {
     }
   }
 }
+

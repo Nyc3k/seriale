@@ -14,16 +14,16 @@ import '../components/serial_provider.dart';
 
 class DetailScreen extends StatelessWidget {
   final Serial serial;
-  final List<Serial> watchedSeries;
-  final List<String>? tags;
-  const DetailScreen({ required this.serial, super.key,  required this.watchedSeries,   this.tags});
-
- void obejrzany(context) {
+  //final List<Serial> watchedSeries;
+  //final List<String>? tags;
+  //const DetailScreen({ required this.serial, super.key,  required this.watchedSeries,   this.tags});
+  const DetailScreen({ required this.serial, super.key});
+ void obejrzany(context, SerialProvider serialProvider) {
   Navigator.push(context, MaterialPageRoute(builder: (context) => SetRanking(
-    allTags: tags!,
+    allTags: serialProvider.fetchedTags,
     isWatched: true,
     newSerial: serial,
-    series: watchedSeries,
+    series: serialProvider.watchedSeries,
     firestore: FirebaseFirestore.instance,
     isNew: false,
     newSesson: false,
@@ -80,10 +80,10 @@ class DetailScreen extends StatelessWidget {
             child: Text('Obejrzany', style: TextStyle(color: Theme.of(context).primaryColor),),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => SetRanking(
-                allTags: tags!,
+                allTags: serialProvider.fetchedTags,
                 isWatched: true,
                 newSerial: serial,
-                series: watchedSeries,
+                series: serialProvider.watchedSeries,
                 firestore: FirebaseFirestore.instance,
                 isNew: false,
                 newSesson: true,
@@ -151,9 +151,14 @@ class DetailScreen extends StatelessWidget {
     }
     List<Widget> platformImages = serial.platforms.map((platform) => Padding(
       padding: const EdgeInsets.only(left: 8.0),
-      child: Image.asset('assets/platform/$platform.png',
-        height: 50,
-        width: 50,
+      child: serial.platforms[0] == 'Nie_Wiem' ? 
+        const Text(
+          '?  ',
+          style: TextStyle(fontSize: 34, color: Colors.grey),
+        ): 
+        Image.asset('assets/platform/$platform.png',
+          height: 50,
+          width: 50,
       )
     )as Widget).toList();
     platformImages.insert(0,const Text('Dostępny na: ', style: TextStyle( fontSize: 18, color: Color.fromARGB(255, 158, 158, 184))));
@@ -169,10 +174,10 @@ class DetailScreen extends StatelessWidget {
                     case 'Option 1':
                       Navigator.push(context,
                       MaterialPageRoute(builder: (context) => SetRanking(
-                        allTags: tags!, 
+                        allTags: serialProvider.fetchedTags, 
                         isWatched: true, 
                         newSerial: serial, 
-                        series: watchedSeries, 
+                        series: serialProvider.watchedSeries, 
                         firestore: FirebaseFirestore.instance, 
                         isNew: false, 
                         newSesson: true, 
@@ -184,10 +189,10 @@ class DetailScreen extends StatelessWidget {
                       nowySezon(context, serialProvider);
                       break;
                     case 'Option 3':
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => EditSeries(serial: serial, watchedSeries: watchedSeries, tags: tags)));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EditSeries(serial: serial, watchedSeries: serialProvider.watchedSeries, tags: serialProvider.fetchedTags)));
                       break;
                     case 'Option 4':
-                      obejrzany(context);
+                      obejrzany(context, serialProvider);
                       break;
                     case 'delete':
                       deleteSeries(context, serialProvider);
