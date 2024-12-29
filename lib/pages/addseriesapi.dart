@@ -6,7 +6,6 @@ import 'package:kajecik/components/api_service.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/setrating.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
 import '../components/serial_provider.dart';
 import '../components/serial.dart';
 import '../components/tableText.dart';
@@ -160,18 +159,18 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
                 children: [
                   const Text("Ustaw pritytet"),
                   Slider(
-                            activeColor: Theme.of(context).primaryColor,
-                            value: _sliderValuePrority,
-                            min: 0,
-                            max: 3,
-                            divisions: 3,
-                            label: _sliderValuePrority.toInt().toString(),
-                            onChanged: (value) {
-                              setState(() {
-                                _sliderValuePrority = value;
-                              });
-                            },
-                          ),
+                    activeColor: Theme.of(context).primaryColor,
+                    value: _sliderValuePrority,
+                    min: 0,
+                    max: 3,
+                    divisions: 3,
+                    label: _sliderValuePrority.toInt().toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        _sliderValuePrority = value;
+                      });
+                    },
+                  ),
                 ],
                ): const SizedBox(),
                const SizedBox( height: 16,),

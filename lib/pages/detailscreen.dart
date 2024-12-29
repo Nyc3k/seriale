@@ -10,7 +10,6 @@ import 'package:kajecik/components/setrating.dart';
 import 'package:kajecik/pages/editseries.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
 import '../components/serial_provider.dart';
 
 class DetailScreen extends StatelessWidget {
@@ -31,8 +30,8 @@ class DetailScreen extends StatelessWidget {
     addSesson: false,
   )));
  }
- void deleteSeries(context) {
-  final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+ void deleteSeries(context, SerialProvider serialProvider) {
+  // final serialProvider = Provider.of<SerialProvider>(context, listen: false);
     
   showDialog(
     context: context,
@@ -67,8 +66,8 @@ class DetailScreen extends StatelessWidget {
   );
  }
 
- void nowySezon(context) {
-  final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+ void nowySezon(context, SerialProvider serialProvider) {
+  //final serialProvider = Provider.of<SerialProvider>(context, listen: false);
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -182,7 +181,7 @@ class DetailScreen extends StatelessWidget {
                     );
                       break;
                     case 'Option 2':
-                      nowySezon(context);
+                      nowySezon(context, serialProvider);
                       break;
                     case 'Option 3':
                       Navigator.push(context, MaterialPageRoute(builder: (context) => EditSeries(serial: serial, watchedSeries: watchedSeries, tags: tags)));
@@ -191,7 +190,7 @@ class DetailScreen extends StatelessWidget {
                       obejrzany(context);
                       break;
                     case 'delete':
-                      deleteSeries(context);
+                      deleteSeries(context, serialProvider);
                       break;
                   }
                 },

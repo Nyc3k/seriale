@@ -48,6 +48,11 @@ class _SerieslistState extends State<Serieslist> {
                 for (final serial in widget.serials)
                   ListTile(
                     key: ValueKey(serial.firebaseId),
+                    leading: Image.network(
+                      serial.imageUrl!,
+                      fit: BoxFit.cover,
+                      height: 140,
+                    ),
                     title: Text(serial.title),
                     subtitle: Text('Ocena: ${serial.rating ?? "Brak"}'),
                   ),
