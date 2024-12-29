@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/multichooser.dart';
 import 'package:kajecik/components/serial.dart';
+import 'package:provider/provider.dart';
+import 'dart:async';
+import '../components/serial_provider.dart';
 
 class RankingUpdate extends StatefulWidget {
   final Serial serial;
@@ -56,6 +59,7 @@ class _RankingUpdateState extends State<RankingUpdate> {
 
   @override
   Widget build(BuildContext context) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
     List<Serial> filteredList = filterTags.isEmpty
         ? widget.series
         : widget.series.where((series) => series.apiGenre!.any((tag) => filterTags.contains(tag))).toList();
@@ -200,8 +204,10 @@ class _RankingUpdateState extends State<RankingUpdate> {
                   'emote' : emote,
                   'rating' : rating,
                   'updatedAt' : Timestamp.now(),
-                });
-                 Navigator.of(context).pop();
+                }).then(
+                  serialProvider.fetchSerials() as FutureOr Function(void value)
+                );
+                Navigator.of(context).pop();
     
                 showDialog(
                   context: context,

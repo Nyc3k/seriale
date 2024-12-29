@@ -4,6 +4,9 @@ import 'package:kajecik/components/multichooser.dart';
 import 'package:kajecik/components/mytextfield.dart';
 import 'package:kajecik/components/serial.dart';
 import 'package:kajecik/components/tableText.dart';
+import 'package:provider/provider.dart';
+import 'dart:async';
+import '../components/serial_provider.dart';
 
 class EditSeries extends StatefulWidget {
   final List<Serial> watchedSeries;
@@ -41,6 +44,7 @@ class _EditSeriesState extends State<EditSeries> {
   late List seriesTags = widget.serial.apiGenre!;
   late List<String> _selectedPlatforms = widget.serial.platforms;
   late double _sliderValuePrority = 1.0;
+  late var serialProvider;
 
   void _addNewOption() {
     final newOption = _newOptionController.text;
@@ -52,7 +56,9 @@ class _EditSeriesState extends State<EditSeries> {
       
         _firestore.collection('seriale').doc(widget.serial.firebaseId).update({
           'apiGenre': widget.serial.apiGenre
-        });
+        }).then(
+            serialProvider.fetchSerials() as FutureOr Function(void value)
+          );
       });
     }
   }
@@ -82,9 +88,11 @@ class _EditSeriesState extends State<EditSeries> {
 
   @override
   Widget build(BuildContext context) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+    
     List<Serial> filteredList = filterTags.isEmpty
-        ? widget.watchedSeries
-        : widget.watchedSeries.where((series) => series.apiGenre!.any((tag) => filterTags.contains(tag))).toList();
+        ? serialProvider.watchedSeries
+        : serialProvider.watchedSeries.where((series) => series.apiGenre!.any((tag) => filterTags.contains(tag))).toList();
 
     //print ('firebaseId; ${widget.serial.firebaseId} \napiId; ${widget.serial.apiId} \nisWatched; ${widget.serial.isWatched} \ntitle; ${widget.serial.title} \nplatforms; ${widget.serial.platforms} \nemote; ${widget.serial.emote} \nimageUrl; ${widget.serial.imageUrl} \nimageUrl2; ${widget.serial.imageUrl2} \nrating; ${widget.serial.rating} \nsesons; ${widget.serial.sesons} \nnotes; ${widget.serial.notes} \ntrailerUrl; ${widget.serial.trailerUrl} \ncreatedAt; updatedAt; \nreleaseYear; ${widget.serial.releaseYear} \nendYear; ${widget.serial.endYear} \nplotOverview; ${widget.serial.plotOverview} \nimdbId; ${widget.serial.imdbId} \nuserRating; ${widget.serial.userRating} \ncriticScore; ${widget.serial.criticScore} \napiGenre; ${widget.serial.apiGenre} \nwatchedSessons; ${widget.serial.watchedSessons} \nnewSesson; ${widget.serial.newSesson} \nprority; ${widget.serial.prority} ');
 
@@ -341,7 +349,9 @@ class _EditSeriesState extends State<EditSeries> {
                     'updatedAt': Timestamp.now(),
                     'userRating': tempUserRating,
                     'watchedSessons': int.parse(_watchedSessonsController.text),
-                  });
+                  }).then(
+                    serialProvider.fetchSerials() as FutureOr Function(void value)
+                  );
 
                 },
                 child: const Icon(Icons.upgrade),

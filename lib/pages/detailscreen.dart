@@ -9,6 +9,9 @@ import 'package:kajecik/components/serial.dart';
 import 'package:kajecik/components/setrating.dart';
 import 'package:kajecik/pages/editseries.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'dart:async';
+import '../components/serial_provider.dart';
 
 class DetailScreen extends StatelessWidget {
   final Serial serial;
@@ -29,6 +32,8 @@ class DetailScreen extends StatelessWidget {
   )));
  }
  void deleteSeries(context) {
+  final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+    
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -39,7 +44,13 @@ class DetailScreen extends StatelessWidget {
           TextButton(
             child: Text('Tak', style: TextStyle(color: Theme.of(context).primaryColor),),
             onPressed: () {
-              FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).delete(); 
+              FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).delete().then((value) => {
+                serialProvider.orderList.remove(serial.firebaseId),
+                FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
+                  'documentIds' : serialProvider.orderList,
+                }).then((_) async {
+                await serialProvider.fetchSerials();
+              })});
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
@@ -57,6 +68,7 @@ class DetailScreen extends StatelessWidget {
  }
 
  void nowySezon(context) {
+  final serialProvider = Provider.of<SerialProvider>(context, listen: false);
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -83,12 +95,14 @@ class DetailScreen extends StatelessWidget {
           ),
           TextButton(
             child: Text('Do obejrzenia', style: TextStyle(color: Theme.of(context).primaryColor),),
-            onPressed: () {
+            onPressed: () async {
               FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).update({
                 'newSesson' : true,
                 'sesons': serial.sesons! + 1,
                 'updatedAt' : Timestamp.now(),
                 'prority' : 2
+              }).then((_) async {
+                await serialProvider.fetchSerials();
               }); 
               Navigator.of(context).pop();
             },
@@ -106,6 +120,8 @@ class DetailScreen extends StatelessWidget {
                 'newSesson' : true,
                 'sesons': serial.sesons! + 1,
                 'updatedAt' : Timestamp.now(),
+              }).then((_) async {
+                await serialProvider.fetchSerials();
               }); 
               Navigator.of(context).pop();
             },
@@ -124,6 +140,7 @@ class DetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
     String tekstJeden = ' ';
     // print('${DateFormat('dd MMMM yyyy, HH:mm').format(serial.wachedAt!.toDate())} > ${DateFormat('dd MMMM yyyy, HH:mm').format(DateTime(2024,8,6,23)).toString()} => ${serial.wachedAt!.toDate().isAfter(DateTime(2024,8,6,23))} ');
     if (serial.releaseYear != null) tekstJeden=tekstJeden+serial.releaseYear.toString();

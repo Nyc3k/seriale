@@ -65,6 +65,114 @@ class _addAPIandRankingState extends State<SetRanking> {
     
   }
 
+  void buttonAction(SerialProvider serialProvider) async {
+    
+    setState(() {
+      _isLoading = true;
+    });
+    String dialogText;
+    bool sessontowatch;
+    _sliderValue == widget.newSerial.sesons ? sessontowatch = false: sessontowatch = true;
+    if (widget.isNew) {
+      dialogText = 'Serial został dodany';
+      widget.firestore.collection('seriale').add({
+              'isWatched' : widget.isWatched,
+              'apiId' : widget.newSerial.apiId,
+              'title' : widget.newSerial.title,
+              'tags' : widget.newSerial.tags,
+              'platforms' : widget.newSerial.platforms,
+              'emote' : emote,
+              'imageUrl' : widget.newSerial.imageUrl,
+              'imageUrl2' : widget.newSerial.imageUrl2,
+              'rating' : rating,
+              'sesons' : widget.newSerial.sesons,
+              'notes' : widget.newSerial.notes,
+              'trailerUrl' : widget.newSerial.trailerUrl,
+              'wachedAt' : [Timestamp.now()],
+              'createdAt' : Timestamp.now(),
+              'updatedAt' : Timestamp.now(),
+              'releaseYear' : widget.newSerial.releaseYear,
+              'endYear' : widget.newSerial.endYear,
+              'plotOverview' : widget.newSerial.plotOverview,
+              'imdbId' : widget.newSerial.imdbId,
+              'userRating' : widget.newSerial.userRating,
+              'criticScore' : widget.newSerial.criticScore,
+              'apiGenre' : widget.newSerial.apiGenre,
+              'watchedSessons' : _sliderValue,
+              'newSesson' : sessontowatch,
+              'prority': 2
+            }).then((value) {
+              serialProvider.orderList.insert( selectedIndex ,value.id);
+              widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
+                'documentIds' : serialProvider.orderList,
+              }).then( (_) async =>
+              await serialProvider.fetchSerials()
+            );
+            });
+    }else{
+      dialogText = 'Serial został zaktalizowany';
+      if (widget.newSerial.wachedAt == null) {
+        widget.newSerial.wachedAt = [Timestamp.now()];
+      } else {
+        widget.newSerial.wachedAt!.add(Timestamp.now());
+      }
+      
+      if (!widget.newSesson) {
+        widget.firestore.collection('seriale').doc(widget.newSerial.firebaseId).update({
+          'newSesson' : sessontowatch,
+          'isWatched' : true,
+          'watchedSessons' : _sliderValue,
+          'emote' : emote,
+          'rating' : rating,
+          'wachedAt' : widget.newSerial.wachedAt,
+          'updatedAt' : Timestamp.now(),
+      }).then( (_) async =>
+        await serialProvider.fetchSerials()
+      );
+      }  else {
+        widget.firestore.collection('seriale').doc(widget.newSerial.firebaseId).update({
+        'newSesson' : false,
+        'sesons': sliderMax,
+        'watchedSessons' : _sliderValue,
+        'emote' : emote,
+        'rating' : rating,
+        'wachedNewSessonAt' : widget.newSerial.wachedAt,
+        'updatedAt' : Timestamp.now(),
+      }).then( (_) async =>
+        await serialProvider.fetchSerials()
+      );
+      }
+    }
+    Navigator.popUntil(context, (route) {
+      if (route.isFirst) {
+        return true;
+      }
+      return false;
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sukces'),
+          content: Text(dialogText),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK', style: TextStyle(color: Theme.of(context).primaryColor),),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -233,108 +341,7 @@ class _addAPIandRankingState extends State<SetRanking> {
                         ),
                       ),
                const SizedBox( height: 16,),
-               ButtonMy(text: "Dodaj", onPressed: () async {
-                setState(() {
-                  _isLoading = true;
-                });
-                String dialogText;
-                bool sessontowatch;
-                _sliderValue == widget.newSerial.sesons ? sessontowatch = false: sessontowatch = true;
-                if (widget.isNew) {
-                  dialogText = 'Serial został dodany';
-                  widget.firestore.collection('seriale').add({
-                          'isWatched' : widget.isWatched,
-                          'apiId' : widget.newSerial.apiId,
-                          'title' : widget.newSerial.title,
-                          'tags' : widget.newSerial.tags,
-                          'platforms' : widget.newSerial.platforms,
-                          'emote' : emote,
-                          'imageUrl' : widget.newSerial.imageUrl,
-                          'imageUrl2' : widget.newSerial.imageUrl2,
-                          'rating' : rating,
-                          'sesons' : widget.newSerial.sesons,
-                          'notes' : widget.newSerial.notes,
-                          'trailerUrl' : widget.newSerial.trailerUrl,
-                          'wachedAt' : [Timestamp.now()],
-                          'createdAt' : Timestamp.now(),
-                          'updatedAt' : Timestamp.now(),
-                          'releaseYear' : widget.newSerial.releaseYear,
-                          'endYear' : widget.newSerial.endYear,
-                          'plotOverview' : widget.newSerial.plotOverview,
-                          'imdbId' : widget.newSerial.imdbId,
-                          'userRating' : widget.newSerial.userRating,
-                          'criticScore' : widget.newSerial.criticScore,
-                          'apiGenre' : widget.newSerial.apiGenre,
-                          'watchedSessons' : _sliderValue,
-                          'newSesson' : sessontowatch,
-                          'prority': 2
-                        }).then((value) {
-                          serialProvider.orderList.insert( selectedIndex ,value.id);
-                          widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
-                            'documentIds' : serialProvider.orderList,
-                          }).then(
-                            serialProvider.fetchSerials() as FutureOr Function(void value)
-                          );
-                        });
-                }else{
-                  dialogText = 'Serial został zaktalizowany';
-                  if (widget.newSerial.wachedAt == null) {
-                    widget.newSerial.wachedAt = [Timestamp.now()];
-                  } else {
-                    widget.newSerial.wachedAt!.add(Timestamp.now());
-                  }
-                  
-                  if (!widget.newSesson) {
-                    widget.firestore.collection('seriale').doc(widget.newSerial.firebaseId).update({
-                      'newSesson' : sessontowatch,
-                      'isWatched' : true,
-                      'watchedSessons' : _sliderValue,
-                      'emote' : emote,
-                      'rating' : rating,
-                      'wachedAt' : widget.newSerial.wachedAt,
-                      'updatedAt' : Timestamp.now(),
-                  });
-                  }  else {
-                    widget.firestore.collection('seriale').doc(widget.newSerial.firebaseId).update({
-                    'newSesson' : false,
-                    'sesons': sliderMax,
-                    'watchedSessons' : _sliderValue,
-                    'emote' : emote,
-                    'rating' : rating,
-                    'wachedNewSessonAt' : widget.newSerial.wachedAt,
-                    'updatedAt' : Timestamp.now(),
-                  });
-                  }
-                }
-                Navigator.popUntil(context, (route) {
-                  if (route.isFirst) {
-                    return true;
-                  }
-                  return false;
-                });
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Sukces'),
-                      content: Text(dialogText),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('OK', style: TextStyle(color: Theme.of(context).primaryColor),),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-
-                setState(() {
-                  _isLoading = false;
-                });
-              }),
+               ButtonMy(text: "Dodaj", onPressed: () => buttonAction(serialProvider)),
             ]
           ),
         ),
