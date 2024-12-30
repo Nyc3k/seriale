@@ -44,6 +44,8 @@ class _addAPIandRankingState extends State<SetRanking> {
   double _sliderValue = 1.0;
   double sliderMax = 1;
   int selectedIndex = 0;
+  List<String> emotes = ['dislike', 'yyyh', 'likeminus', 'like', 'likeplus', 'heartminus', 'heart'];
+
 
   @override
   void initState() {
@@ -197,16 +199,41 @@ class _addAPIandRankingState extends State<SetRanking> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 25.0),
+              //const SizedBox(height: 25.0),
               Text( widget.newSerial.title , style: const TextStyle(fontSize: 25),),
-              Text('dostępny w ${widget.newSerial.platforms} \n tagi: ${widget.newSerial.apiGenre} ilość sezonów ${widget.newSerial.sesons}'),
-              const SizedBox(height: 16.0),             
+              const SizedBox(height: 8.0),
+              Text('Wybierz emotkę określającą ten serial:'),
               Form(
                 child: Column(
                     children: [
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                        ),
+                        itemCount: emotes.length,
+                        itemBuilder: (context, index) {
+                          return IconButton(
+                            iconSize: 50, // Ustaw rozmiar ikony
+                            padding: EdgeInsets.all(8),
+                            icon: Image.asset(
+                              'assets/emote/${emotes[index]}.png',
+                              height: 40,
+                              width: 40,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                emote = emotes[index];
+                              });
+                            },
+                          );
+                        },
+                      ),
                       Column(
                         children: [
                           TableText( textWTabeli: 'Liczba obejrzanych sezonów: ${_sliderValue.toInt()}'),
+                          widget.newSerial.sesons! > 1 ? 
                           Slider(
                             activeColor: Theme.of(context).primaryColor,
                             value: _sliderValue,
@@ -219,7 +246,7 @@ class _addAPIandRankingState extends State<SetRanking> {
                                 _sliderValue = value;
                               });
                             },
-                          ),
+                          ) : const Text(''),
                         ]
                       ),
                       if (widget.newSesson) const Text('Czy chcesz zmienić ocenę?'),
@@ -239,21 +266,6 @@ class _addAPIandRankingState extends State<SetRanking> {
                                     setState(() {
                                       try {
                                         rating = double.parse(value);
-                                        if (rating < 4) {
-                                          emote = 'dislike';
-                                        }  else if (rating >= 4 && rating < 5) {
-                                          emote = 'yyyh';
-                                        } else if (rating >= 5 && rating < 5.5) {
-                                          emote = 'likeminus';
-                                        } else if (rating >= 5.5 && rating < 7) {
-                                          emote = 'like';
-                                        } else if (rating >= 7 && rating < 8.5) {
-                                          emote = 'likeplus';
-                                        } else if (rating >= 8.5 && rating < 9) {
-                                          emote = 'heartminus';
-                                        } else if (rating >= 9) {
-                                          emote = 'heart';
-                                        }
                                       } catch (e) {
                                         emote = 'Błędna wartość';
                                       }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/serial.dart';
+import 'package:kajecik/components/test.dart';
 import 'package:kajecik/components/viewseries.dart';
 import 'package:kajecik/pages/addnewseries.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -54,6 +55,7 @@ Future<void> main() async {
         )
       ),
       home: const HomeScreen(),
+      //home: const testowy(),
     ),
   ),
   )
@@ -142,9 +144,9 @@ void sortSerialList(List<Serial> serialList, List<String> orderList) {
                 }
 
                 _widgetOptions = <Widget>[
-                  ViewSeries(series: serialProvider.watchedSeries, appBarTitle: 'Obejrzane', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: false, seriesOrder: serialProvider.orderList,),
+                  ViewSeries(series: serialProvider.watchedSeries, appBarTitle: 'Obejrzane', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: false, seriesOrder: serialProvider.orderList, watched: true),
                   AddNewSeries(multiSelectTags: _fetchedTags, series: watchedSeries),
-                  ViewSeries(series: serialProvider.seriesToWatch, appBarTitle: 'Do Obejrzenia', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: true, seriesOrder: serialProvider.orderList,),
+                  ViewSeries(series: serialProvider.seriesToWatch, appBarTitle: 'Do Obejrzenia', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: true, seriesOrder: serialProvider.orderList, watched: false),
                 ];
 
                 return TabBarView(

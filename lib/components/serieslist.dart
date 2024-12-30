@@ -15,7 +15,8 @@ class Serieslist extends StatefulWidget {
   final bool withNewSessons;
   final List<String> tags;
   final List<String> seriesOrder;
-  const Serieslist({super.key, required this.serials, required this.watchedSeries, required this.opcja, required this.withNewSessons, required this.tags, required this.seriesOrder});
+  final bool watched;
+  const Serieslist({super.key, required this.serials, required this.watchedSeries, required this.opcja, required this.withNewSessons, required this.tags, required this.seriesOrder, required this.watched});
 
   @override
   State<Serieslist> createState() => _SerieslistState();
@@ -54,8 +55,8 @@ class _SerieslistState extends State<Serieslist> {
   @override
   Widget build(BuildContext context) {
 
-
-    if(widget.opcja == 1){
+    print(widget.opcja == 1);
+    if(widget.opcja == 1 && widget.watched){
       return widget.serials.isEmpty ? const Center(child: Text('Brak seriali')):
       ReorderableListView(
         onReorder: _onReorder,

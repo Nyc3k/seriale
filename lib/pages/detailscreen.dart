@@ -45,11 +45,14 @@ class DetailScreen extends StatelessWidget {
             onPressed: () {
               FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).delete().then((value) => {
                 serialProvider.orderList.remove(serial.firebaseId),
+                serialProvider.watchedSeries.remove(serial),
                 FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
                   'documentIds' : serialProvider.orderList,
-                }).then((_) async {
-                await serialProvider.fetchSerials();
-              })});
+                })
+                // .then((_) async {
+                // await serialProvider.fetchSerials();
+                // })
+              });
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
@@ -334,14 +337,16 @@ class DetailScreen extends StatelessWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const DetaleText(widgetText: 'Utworzono: ' , size: 16,),
-                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.createdAt!.toDate()).toString())
+                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.createdAt!.toDate()).toString(),
+                                          style: const TextStyle(fontSize: 13),)
                                     ],
                                   ),
                                   if(serial.updatedAt != null) Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const DetaleText(widgetText: 'Zaktualizowano: ' , size: 16,),
-                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.updatedAt!.toDate()).toString())
+                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.updatedAt!.toDate()).toString(),
+                                          style: const TextStyle(fontSize: 13),)
                                     ],
                                   ),
                                     ],

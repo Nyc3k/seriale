@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/multichooser.dart';
 import 'package:kajecik/components/raport.dart';
+import 'package:kajecik/components/serial_provider.dart';
 import 'package:kajecik/components/serieslist.dart';
 import 'package:kajecik/components/filtrcard.dart';
+import 'package:provider/provider.dart';
 import 'serial.dart';
 
 class ViewSeries extends StatefulWidget {
@@ -12,9 +14,9 @@ class ViewSeries extends StatefulWidget {
   final List<String> seriesOrder;
   final List<Serial> watchedSeries;
   final bool withNewSessons;
+  final bool watched;
 
-
-  const ViewSeries({required this.series, super.key, required this.appBarTitle, required this.tags, required this.watchedSeries, required this.withNewSessons, required this.seriesOrder});
+  const ViewSeries({required this.series, super.key, required this.appBarTitle, required this.tags, required this.watchedSeries, required this.withNewSessons, required this.seriesOrder , required this.watched});
 
   @override
   State<ViewSeries> createState() => _ViewSeriesState();
@@ -58,6 +60,12 @@ void filterItems() {
     setState(() {
       queryTitle = query;
       filterItems();
+    });
+  }
+
+  void refreszAll(SerialProvider serialProvider) {
+    setState(() {
+      serialProvider.fetchSerials();
     });
   }
 
@@ -213,7 +221,9 @@ void filterItems() {
   
   @override
   Widget build(BuildContext context) {
-  
+
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+    
     return Scaffold(
       appBar: AppBar(
         title: _isSearching
@@ -235,19 +245,25 @@ void filterItems() {
               series: widget.watchedSeries,
             ))),
           ),
-        actions: _isSearching 
-          ? [
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: _stopSearch,
-                )
-              ]
-            : [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _startSearch,
-                ),
-              ],
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => refreszAll(serialProvider),
+            ),
+          _isSearching 
+          ? 
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: _stopSearch,
+            )
+          : 
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: _startSearch,
+            ),
+              
+        ],
+        
         backgroundColor: const Color.fromARGB(255, 18, 18, 23),
       ),
       backgroundColor: const Color.fromARGB(255, 18, 18, 23),
@@ -269,13 +285,14 @@ void filterItems() {
                   onConfirm: filterItemsPlatforms ,
                   ),
               )),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.45),
-                ),
-                onPressed: _showSortDialog,
-                child: const Text('Sortuj', style: TextStyle(color: Colors.white),),
-              ),
+              // Przycisk umorzliwiający sortowanie 
+              // ElevatedButton(
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Theme.of(context).primaryColor.withOpacity(0.45),
+              //   ),
+              //   onPressed: _showSortDialog,
+              //   child: const Text('Sortuj', style: TextStyle(color: Colors.white),),
+              // ),
               Expanded( flex: 3, child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: MultiChooser(
@@ -308,7 +325,7 @@ void filterItems() {
             ),
           ),
         ),          
-        Expanded(  child: Serieslist(serials: filteredItems, watchedSeries: widget.watchedSeries, opcja: opcja, withNewSessons: widget.withNewSessons, tags: widget.tags, seriesOrder: widget.seriesOrder,),
+        Expanded(  child: Serieslist(serials: filteredItems, watchedSeries: widget.watchedSeries, opcja: opcja, withNewSessons: widget.withNewSessons, tags: widget.tags, seriesOrder: widget.seriesOrder, watched: widget.watched,),
         ),
       ],
     ),
