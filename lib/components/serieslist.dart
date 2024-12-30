@@ -58,12 +58,12 @@ class _SerieslistState extends State<Serieslist> {
     if(widget.opcja == 1){
       return widget.serials.isEmpty ? const Center(child: Text('Brak seriali')):
       ReorderableListView(
-              onReorder: _onReorder,
-              children: [
-                for (final serial in widget.serials)
-                  ListViewElement(serial: serial, key: ValueKey(serial.firebaseId),),
-              ],
-            );
+        onReorder: _onReorder,
+        children: [
+          for (final serial in widget.serials)
+            ListViewElement(serial: serial, key: ValueKey(serial.firebaseId),),
+        ],
+      );
     } else {
       return widget.serials.isEmpty ? const Center(child: Text('Brak seriali')):
       GridView.builder(

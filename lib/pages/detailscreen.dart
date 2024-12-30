@@ -289,12 +289,12 @@ class DetailScreen extends StatelessWidget {
                                     Text(serial.userRating!.toString(), style: const TextStyle( fontSize: 18, color: Color.fromARGB(255, 158, 158, 184))),
                                   ],
                                 ),
-                                if(serial.rating != null) Column(
-                                  children: [
-                                    const Text('Moja', style: TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
-                                    Text(serial.rating!.toString(), style: const TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
-                                  ],
-                                ),
+                                // if(serial.rating != null) Column(
+                                //   children: [
+                                //     const Text('Moja', style: TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
+                                //     Text(serial.rating!.toString(), style: const TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
+                                //   ],
+                                // ),
                                 if(serial.criticScore != null) Column(
                                   children: [
                                     const Text('Krytycy', style: TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
