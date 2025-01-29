@@ -126,9 +126,14 @@ class _addAPIandRankingState extends State<SetRanking> {
           'rating' : rating,
           'wachedAt' : widget.newSerial.wachedAt,
           'updatedAt' : Timestamp.now(),
-      }).then( (_) async =>
-        await serialProvider.fetchSerials()
-      );
+      }).then((value) {
+              serialProvider.orderList.insert( selectedIndex , widget.newSerial.firebaseId!);
+              widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
+                'documentIds' : serialProvider.orderList,
+              }).then( (_) async =>
+              await serialProvider.fetchSerials()
+            );
+            });
       }  else {
         widget.firestore.collection('seriale').doc(widget.newSerial.firebaseId).update({
         'newSesson' : false,
@@ -138,9 +143,14 @@ class _addAPIandRankingState extends State<SetRanking> {
         'rating' : rating,
         'wachedNewSessonAt' : widget.newSerial.wachedAt,
         'updatedAt' : Timestamp.now(),
-      }).then( (_) async =>
-        await serialProvider.fetchSerials()
-      );
+      }).then((value) {
+              serialProvider.orderList.insert( selectedIndex , widget.newSerial.firebaseId!);
+              widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
+                'documentIds' : serialProvider.orderList,
+              }).then( (_) async =>
+              await serialProvider.fetchSerials()
+            );
+            });
       }
     }
     Navigator.popUntil(context, (route) {
