@@ -1,11 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/serial.dart';
+import 'package:kajecik/components/test.dart';
 import 'package:kajecik/components/viewseries.dart';
 import 'package:kajecik/pages/addnewseries.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:kajecik/components/serial_provider.dart';
 
 Future<void> main() async {
   
@@ -25,7 +27,11 @@ Future<void> main() async {
   );
 
 
-  runApp(GraphQLProvider(
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => SerialProvider()),
+    ],
+    child: GraphQLProvider(
     client: client,
     child: MaterialApp(
       theme: 
@@ -49,8 +55,11 @@ Future<void> main() async {
         )
       ),
       home: const HomeScreen(),
+      //home: const testowy(),
     ),
-  ));
+  ),
+  )
+  );
 }
 
 
@@ -104,88 +113,48 @@ int? convertToInt(dynamic value) {
   }
 }
 
+void sortSerialList(List<Serial> serialList, List<String> orderList) {
+  // Tworzymy mapę indeksów dla orderList
+  final orderMap = {for (var i = 0; i < orderList.length; i++) orderList[i]: i};
+
+  serialList.sort((a, b) {
+    int indexA = orderMap[a.firebaseId] ?? -1;
+    int indexB = orderMap[b.firebaseId] ?? -1;
+    return indexA.compareTo(indexB);
+  });
+}
 
   @override
   Widget build(BuildContext context)  {
-    
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      serialProvider.fetchSerials();
+    });
 
     return Scaffold(
       body: DefaultTabController(
         length: _widgetOptions.length,
         child: Column(
           children: [
-            Expanded(
-              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: FirebaseFirestore.instance.collection('seriale').snapshots(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-    
-                  if (snapshot.hasError) {
-                    return const Center(child: Text('Something went wrong'));
-                  }
-    
-                  if (snapshot.hasData) {
-                    series = snapshot.data!.docs.map((doc) {
-                      var data = doc.data();
-                      //print('${doc.id} wachedAt: ${data['wachedAt']}}');
-                      return Serial(
-                        firebaseId: doc.id,
-                        isWatched: data['isWatched'],
-                        title: data['title'],
-                        apiId: data['apiId'],
-                        platforms: List<String>.from(data['platforms']),
-                        emote: data['emote'],
-                        imageUrl: data['imageUrl'],
-                        imageUrl2: data['imageUrl2'],
-                        rating: convertToDouble(data['rating']),
-                        sesons: convertToInt(data['sesons']),
-                        notes: data['notes'],
-                        trailerUrl: data['trailerUrl'],
-                        createdAt: data['createdAt'],
-                        updatedAt: data['updatedAt'],
-                        releaseYear: convertToInt(data['releaseYear']),
-                        endYear: convertToInt(data['endYear']),
-                        plotOverview: data['plotOverview'],
-                        imdbId: data['imdbId'],
-                        userRating: convertToDouble(data['userRating']),
-                        criticScore: convertToInt(data['criticScore']),
-                        apiGenre: List<String>.from(data['apiGenre']),
-                        watchedSessons: data['watchedSessons'].toInt(),
-                        newSesson: data['newSesson'],
-                        prority: data['prority']?.toInt(),
-                        wachedAt: (data['wachedAt'] as List)
-                          .map((item) => item as Timestamp)
-                          .toList(),
-                        //wachedNewSessonAt: data['wachedNewSessonAt']
-    
-                      );
-                    }).toList();
-                    watchedSeries = series.where((serie) => serie.isWatched == true).toList();
-                    watchedSeries.sort((a,b) => b.rating!.compareTo(a.rating!));
-                    seriesToWatch = series.where((serie) => serie.isWatched == false).toList();
-                    newSessonsToWatch = watchedSeries.where((serie) => serie.newSesson == true).toList();
-                    seriesToWatch = seriesToWatch + newSessonsToWatch;
-                    seriesToWatch.sort((a,b) => b.prority!.compareTo(a.prority!));
-    
-                    _fetchedTags = series.expand((series) => series.apiGenre!).toSet().toList().cast();
-    
-                    _widgetOptions = <Widget>[
-                      ViewSeries(series: watchedSeries, appBarTitle: 'Obejrzane', tags: _fetchedTags, watchedSeries: watchedSeries, withNewSessons: false,),
-                      AddNewSeries(multiSelectTags: _fetchedTags, series: watchedSeries),
-                      ViewSeries(series: seriesToWatch, appBarTitle: 'Do Obejrzenia', tags: _fetchedTags, watchedSeries: watchedSeries, withNewSessons: true,),
-                    ];
-    
-                    return TabBarView(
-                      children: _widgetOptions,
-                    );
-                  } else {
-                    return const Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 25, 145, 14)));
-                  }
-                },
-              ),
-            ),
+            Expanded(child: Consumer<SerialProvider>(
+              builder: (context, serialProvider, child) {
+                if (serialProvider.serialList.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                _widgetOptions = <Widget>[
+                  ViewSeries(series: serialProvider.watchedSeries, appBarTitle: 'Obejrzane', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: false, seriesOrder: serialProvider.orderList, watched: true),
+                  AddNewSeries(multiSelectTags: _fetchedTags, series: watchedSeries),
+                  ViewSeries(series: serialProvider.seriesToWatch, appBarTitle: 'Do Obejrzenia', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: true, seriesOrder: serialProvider.orderList, watched: false),
+                ];
+
+                return TabBarView(
+                  children: _widgetOptions,
+                );
+              },
+            )),
+
             Container(
               color: const Color.fromARGB(255, 41, 41, 56),              
               child: TabBar(

@@ -5,7 +5,8 @@ import 'package:kajecik/components/api_response.dart';
 import 'package:kajecik/components/api_service.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/setrating.dart';
-
+import 'package:provider/provider.dart';
+import '../components/serial_provider.dart';
 import '../components/serial.dart';
 import '../components/tableText.dart';
 
@@ -58,7 +59,7 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
         
       });
     } catch (e) {
-      //print('_fetchMovies SIĘ WYWALIŁO $e');
+      print('_fetchMovies SIĘ WYWALIŁO $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -76,6 +77,8 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
 
   @override
   Widget build(BuildContext context) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+    
     return _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 25, 145, 14)))
           :Scaffold(
@@ -156,18 +159,18 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
                 children: [
                   const Text("Ustaw pritytet"),
                   Slider(
-                            activeColor: Theme.of(context).primaryColor,
-                            value: _sliderValuePrority,
-                            min: 0,
-                            max: 3,
-                            divisions: 3,
-                            label: _sliderValuePrority.toInt().toString(),
-                            onChanged: (value) {
-                              setState(() {
-                                _sliderValuePrority = value;
-                              });
-                            },
-                          ),
+                    activeColor: Theme.of(context).primaryColor,
+                    value: _sliderValuePrority,
+                    min: 0,
+                    max: 3,
+                    divisions: 3,
+                    label: _sliderValuePrority.toInt().toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        _sliderValuePrority = value;
+                      });
+                    },
+                  ),
                 ],
                ): const SizedBox(),
                const SizedBox( height: 16,),
@@ -251,6 +254,8 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
             'newSesson' : false,
             'prority' : _sliderValuePrority,
             'wachedAt': []
+          }).then((_) async {
+            await serialProvider.fetchSerials();
           });
           widget.formClick();
           Navigator.popUntil(context, (route) {

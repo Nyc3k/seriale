@@ -19,7 +19,7 @@ class SeriesCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(serial: serial, watchedSeries: watchedSeries)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(serial: serial )));
       },
       child: Container(
         width: 180,

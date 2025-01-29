@@ -17,7 +17,7 @@ class PosterMinicard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(serial: serial, watchedSeries: watchedSeries, tags: tags)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(serial: serial)));
       },
       onLongPress: () {
         if(serial.isWatched) Navigator.push(context, MaterialPageRoute(builder: (context) => RankingUpdate(serial: serial, series: watchedSeries, allTags: tags,)));

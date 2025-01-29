@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
-import 'package:kajecik/components/multichooser.dart';
 import 'package:kajecik/components/serial.dart';
+import 'package:provider/provider.dart';
+import 'dart:async';
+import '../components/serial_provider.dart';
 
 class RankingUpdate extends StatefulWidget {
   final Serial serial;
@@ -27,6 +29,8 @@ class _RankingUpdateState extends State<RankingUpdate> {
   late List filterTags = widget.serial.apiGenre!;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   late List<Serial> filteredList = widget.series;
+  List<String> emotes = ['dislike', 'yyyh', 'likeminus', 'like', 'likeplus', 'heartminus', 'heart'];
+
 
   @override
   void initState() {
@@ -56,6 +60,7 @@ class _RankingUpdateState extends State<RankingUpdate> {
 
   @override
   Widget build(BuildContext context) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
     List<Serial> filteredList = filterTags.isEmpty
         ? widget.series
         : widget.series.where((series) => series.apiGenre!.any((tag) => filterTags.contains(tag))).toList();
@@ -77,13 +82,12 @@ class _RankingUpdateState extends State<RankingUpdate> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 25.0),
+              const SizedBox(height: 5.0),
               Text( widget.serial.title , style: const TextStyle(fontSize: 25)),
               const SizedBox(height: 16.0),             
               Form(
                 child: Column(
                     children: [
-                      
                       Container(
                         padding: const EdgeInsets.all(10),
                         child: Row(
@@ -98,22 +102,7 @@ class _RankingUpdateState extends State<RankingUpdate> {
                                     rating = double.parse(value);
                                     setState(() {
                                       try {
-                                        rating = double.parse(value);
-                                        if (rating < 4) {
-                                          emote = 'dislike';
-                                        }  else if (rating >= 4 && rating < 5) {
-                                          emote = 'yyyh';
-                                        } else if (rating >= 5 && rating < 5.5) {
-                                          emote = 'likeminus';
-                                        } else if (rating >= 5.5 && rating < 7) {
-                                          emote = 'like';
-                                        } else if (rating >= 7 && rating < 8.5) {
-                                          emote = 'likeplus';
-                                        } else if (rating >= 8.5 && rating < 9) {
-                                          emote = 'heartminus';
-                                        } else if (rating >= 9) {
-                                          emote = 'heart';
-                                        }
+                                        rating = double.parse(value);                                        
                                       } catch (e) {
                                         emote = 'Błędna wartość';
                                       }
@@ -137,7 +126,6 @@ class _RankingUpdateState extends State<RankingUpdate> {
                                 ),
                               ),
                             ),
-                            IconButton(onPressed: refresRating, icon: const Icon(Icons.refresh_rounded)),
                             const SizedBox(width: 15.0),
                             Expanded(
                               flex: 3,
@@ -153,46 +141,31 @@ class _RankingUpdateState extends State<RankingUpdate> {
                         ),
                         
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: MultiChooser(
-                          allTags: widget.allTags, 
-                          title: 'Wybierz tagi',
-                          initvalues: widget.serial.apiGenre!,
-                          myChipDisplay: false,
-                          onConfirm: (results) {
-                            setState(() {
-                              filterTags = results.cast<String>();
-                            });
-                          },)
-                      ),
-                      SizedBox(
-                        height: 250,
-                        child: ListView.builder(
-                          itemCount: filteredList.length,
-                          itemBuilder: (context, index) {
-                             var tagsText = filteredList[index].apiGenre!
-                              .map((e) => Padding(
-                                    padding: const EdgeInsets.only(right: 4.0),
-                                    child: Text(e, style: TextStyle(color: Color.fromARGB(255, 158, 158, 184))),
-                                  ))
-                              .toList();
-    
-                          return ListTile(
-                            title: Text(filteredList[index].title),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Wrap(
-                                  children: tagsText, // Wyświetlamy tagi za pomocą Wrap
-                                ),
-                                SizedBox(height: 4), // Dodatkowa przestrzeń między tagami a oceną
-                                Text('Ocena: ${filteredList[index].rating}'),
-                              ],
+                      
+                      const Text('Wybierz emotkę określającą ten serial:'),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                        ),
+                        itemCount: emotes.length,
+                        itemBuilder: (context, index) {
+                          return IconButton(
+                            iconSize: 50, // Ustaw rozmiar ikony
+                            padding: EdgeInsets.all(8),
+                            icon: Image.asset(
+                              'assets/emote/${emotes[index]}.png',
+                              height: 40,
+                              width: 40,
                             ),
+                            onPressed: () {
+                              setState(() {
+                                emote = emotes[index];
+                              });
+                            },
                           );
                         },
-                      ),
                       ),
                const SizedBox( height: 16,),
                ButtonMy(text: "Aktualizuj", onPressed: () async {
@@ -201,7 +174,7 @@ class _RankingUpdateState extends State<RankingUpdate> {
                   'rating' : rating,
                   'updatedAt' : Timestamp.now(),
                 });
-                 Navigator.of(context).pop();
+                Navigator.of(context).pop();
     
                 showDialog(
                   context: context,

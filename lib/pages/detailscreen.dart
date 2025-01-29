@@ -9,26 +9,30 @@ import 'package:kajecik/components/serial.dart';
 import 'package:kajecik/components/setrating.dart';
 import 'package:kajecik/pages/editseries.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../components/serial_provider.dart';
 
 class DetailScreen extends StatelessWidget {
   final Serial serial;
-  final List<Serial> watchedSeries;
-  final List<String>? tags;
-  const DetailScreen({ required this.serial, super.key,  required this.watchedSeries,   this.tags});
-
- void obejrzany(context) {
+  //final List<Serial> watchedSeries;
+  //final List<String>? tags;
+  //const DetailScreen({ required this.serial, super.key,  required this.watchedSeries,   this.tags});
+  const DetailScreen({ required this.serial, super.key});
+ void obejrzany(context, SerialProvider serialProvider) {
   Navigator.push(context, MaterialPageRoute(builder: (context) => SetRanking(
-    allTags: tags!,
+    allTags: serialProvider.fetchedTags,
     isWatched: true,
     newSerial: serial,
-    series: watchedSeries,
+    series: serialProvider.watchedSeries,
     firestore: FirebaseFirestore.instance,
     isNew: false,
     newSesson: false,
     addSesson: false,
   )));
  }
- void deleteSeries(context) {
+ void deleteSeries(context, SerialProvider serialProvider) {
+  // final serialProvider = Provider.of<SerialProvider>(context, listen: false);
+    
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -39,7 +43,16 @@ class DetailScreen extends StatelessWidget {
           TextButton(
             child: Text('Tak', style: TextStyle(color: Theme.of(context).primaryColor),),
             onPressed: () {
-              FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).delete(); 
+              FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).delete().then((value) => {
+                serialProvider.orderList.remove(serial.firebaseId),
+                serialProvider.watchedSeries.remove(serial),
+                FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
+                  'documentIds' : serialProvider.orderList,
+                })
+                // .then((_) async {
+                // await serialProvider.fetchSerials();
+                // })
+              });
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
@@ -56,7 +69,8 @@ class DetailScreen extends StatelessWidget {
   );
  }
 
- void nowySezon(context) {
+ void nowySezon(context, SerialProvider serialProvider) {
+  //final serialProvider = Provider.of<SerialProvider>(context, listen: false);
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -69,10 +83,10 @@ class DetailScreen extends StatelessWidget {
             child: Text('Obejrzany', style: TextStyle(color: Theme.of(context).primaryColor),),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => SetRanking(
-                allTags: tags!,
+                allTags: serialProvider.fetchedTags,
                 isWatched: true,
                 newSerial: serial,
-                series: watchedSeries,
+                series: serialProvider.watchedSeries,
                 firestore: FirebaseFirestore.instance,
                 isNew: false,
                 newSesson: true,
@@ -83,12 +97,14 @@ class DetailScreen extends StatelessWidget {
           ),
           TextButton(
             child: Text('Do obejrzenia', style: TextStyle(color: Theme.of(context).primaryColor),),
-            onPressed: () {
+            onPressed: () async {
               FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).update({
                 'newSesson' : true,
                 'sesons': serial.sesons! + 1,
                 'updatedAt' : Timestamp.now(),
                 'prority' : 2
+              }).then((_) async {
+                await serialProvider.fetchSerials();
               }); 
               Navigator.of(context).pop();
             },
@@ -106,6 +122,8 @@ class DetailScreen extends StatelessWidget {
                 'newSesson' : true,
                 'sesons': serial.sesons! + 1,
                 'updatedAt' : Timestamp.now(),
+              }).then((_) async {
+                await serialProvider.fetchSerials();
               }); 
               Navigator.of(context).pop();
             },
@@ -124,6 +142,7 @@ class DetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
     String tekstJeden = ' ';
     // print('${DateFormat('dd MMMM yyyy, HH:mm').format(serial.wachedAt!.toDate())} > ${DateFormat('dd MMMM yyyy, HH:mm').format(DateTime(2024,8,6,23)).toString()} => ${serial.wachedAt!.toDate().isAfter(DateTime(2024,8,6,23))} ');
     if (serial.releaseYear != null) tekstJeden=tekstJeden+serial.releaseYear.toString();
@@ -135,9 +154,14 @@ class DetailScreen extends StatelessWidget {
     }
     List<Widget> platformImages = serial.platforms.map((platform) => Padding(
       padding: const EdgeInsets.only(left: 8.0),
-      child: Image.asset('assets/platform/$platform.png',
-        height: 50,
-        width: 50,
+      child: serial.platforms[0] == 'Nie_Wiem' ? 
+        const Text(
+          '?  ',
+          style: TextStyle(fontSize: 34, color: Colors.grey),
+        ): 
+        Image.asset('assets/platform/$platform.png',
+          height: 50,
+          width: 50,
       )
     )as Widget).toList();
     platformImages.insert(0,const Text('Dostępny na: ', style: TextStyle( fontSize: 18, color: Color.fromARGB(255, 158, 158, 184))));
@@ -153,10 +177,10 @@ class DetailScreen extends StatelessWidget {
                     case 'Option 1':
                       Navigator.push(context,
                       MaterialPageRoute(builder: (context) => SetRanking(
-                        allTags: tags!, 
+                        allTags: serialProvider.fetchedTags, 
                         isWatched: true, 
                         newSerial: serial, 
-                        series: watchedSeries, 
+                        series: serialProvider.watchedSeries, 
                         firestore: FirebaseFirestore.instance, 
                         isNew: false, 
                         newSesson: true, 
@@ -165,16 +189,16 @@ class DetailScreen extends StatelessWidget {
                     );
                       break;
                     case 'Option 2':
-                      nowySezon(context);
+                      nowySezon(context, serialProvider);
                       break;
                     case 'Option 3':
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => EditSeries(serial: serial, watchedSeries: watchedSeries, tags: tags)));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EditSeries(serial: serial, watchedSeries: serialProvider.watchedSeries, tags: serialProvider.fetchedTags)));
                       break;
                     case 'Option 4':
-                      obejrzany(context);
+                      obejrzany(context, serialProvider);
                       break;
                     case 'delete':
-                      deleteSeries(context);
+                      deleteSeries(context, serialProvider);
                       break;
                   }
                 },
@@ -268,12 +292,12 @@ class DetailScreen extends StatelessWidget {
                                     Text(serial.userRating!.toString(), style: const TextStyle( fontSize: 18, color: Color.fromARGB(255, 158, 158, 184))),
                                   ],
                                 ),
-                                if(serial.rating != null) Column(
-                                  children: [
-                                    const Text('Moja', style: TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
-                                    Text(serial.rating!.toString(), style: const TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
-                                  ],
-                                ),
+                                // if(serial.rating != null) Column(
+                                //   children: [
+                                //     const Text('Moja', style: TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
+                                //     Text(serial.rating!.toString(), style: const TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
+                                //   ],
+                                // ),
                                 if(serial.criticScore != null) Column(
                                   children: [
                                     const Text('Krytycy', style: TextStyle( fontSize: 18, color:  Color.fromARGB(255, 158, 158, 184))),
@@ -313,14 +337,16 @@ class DetailScreen extends StatelessWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const DetaleText(widgetText: 'Utworzono: ' , size: 16,),
-                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.createdAt!.toDate()).toString())
+                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.createdAt!.toDate()).toString(),
+                                          style: const TextStyle(fontSize: 13),)
                                     ],
                                   ),
                                   if(serial.updatedAt != null) Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const DetaleText(widgetText: 'Zaktualizowano: ' , size: 16,),
-                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.updatedAt!.toDate()).toString())
+                                      Text(DateFormat('dd MMMM yyyy, HH:mm').format(serial.updatedAt!.toDate()).toString(),
+                                          style: const TextStyle(fontSize: 13),)
                                     ],
                                   ),
                                     ],

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,31 +8,31 @@ import 'package:kajecik/components/serial.dart';
 
 class testowy extends StatelessWidget {
 
-  const testowy({super.key, required this.lista});
+  const testowy({super.key,});
 
-  final  List<Serial> lista; 
 
   
   @override
   Widget build(BuildContext context) {
-    
+    List<String> emotes = ['dislike', 'yyyh', 'likeminus', 'like', 'likeplus', 'heartminus', 'heart'];
 
-    return Container(
-      child: ButtonMy(text: 'KLIKAJ', onPressed: (){
-        for (var element in lista) {
-          print('${element.firebaseId}');
-          if (element.wachedNewSessonAt != null) {
-            print('Tu coś nie tak ${element.firebaseId}');
-          } else {
-            FirebaseFirestore.instance.collection('seriale').doc(element.firebaseId).update({
-              'wachedAt' : [Timestamp.now()],
-              'updatedAt' : Timestamp.now(),
-          });
-
-          }
-          
+    return Scaffold(
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4
+        ),
+        itemCount: 7,
+        itemBuilder: (context, index) {
+          IconButton(
+            icon: Image.asset('assets/emote/${emotes[index]}.png',
+              height: 40,
+              width: 40,),
+            onPressed: () {
+              print(emotes[index]);
+            },
+          );
         }
-      }),
+      ),
     );
   }
 }
