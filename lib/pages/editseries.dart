@@ -240,44 +240,7 @@ class _EditSeriesState extends State<EditSeries> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: MultiChooser(
-                    allTags: widget.tags!, 
-                    title: 'Wybierz tagi do wyświetlenia w tabeli',
-                    initvalues: widget.serial.apiGenre!,
-                    myChipDisplay: false,
-                    onConfirm: (results) {
-                      setState(() {
-                        filterTags = results.cast<String>();
-                      });
-                    },)
-                ),
-                SizedBox(
-                  height: 250,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        columns: const [
-                          DataColumn(label: TableText(textWTabeli: 'Tytuł')),
-                          DataColumn(label: TableText(textWTabeli: 'Ocena')),
-                          DataColumn(label: TableText(textWTabeli: 'Tagi')),
-                          DataColumn(label: TableText(textWTabeli: 'Emote')),
-                        ],
-                        rows: filteredList.map((item) {
-                          return DataRow(cells: [
-                            DataCell(TableText(textWTabeli: item.title )),
-                            DataCell(TableText(textWTabeli: item.rating.toString())),
-                            DataCell(TableText(textWTabeli: item.apiGenre!.join(', '))),
-                            DataCell(TableText(textWTabeli: item.emote as String)),
-                          ]);
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
+                
                 Mytextfield(controller: _sessonsController, label: 'Ilość sezonów', type: TextInputType.number,),
                 Mytextfield(controller: _watchedSessonsController, label: 'Ilość obejrzanych sezonów', type: TextInputType.number,),
                 Mytextfield(controller: _releseYearController, label: 'Rok wydania', type: TextInputType.number,),

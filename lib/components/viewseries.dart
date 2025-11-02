@@ -224,11 +224,10 @@ void filterItems() {
     final Map<String, int> mapaWynikow = {};
 
     for (var element in widget.series) {
-      mapaWynikow.update(
-        element.firebaseId!,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
+      if (element.isWatched) {
+        
+      }
+      
     }
     mapaWynikow.forEach((klucz, wartosc) {
       print('Element "$klucz" występuje: $wartosc raz(y).');
@@ -287,7 +286,7 @@ void filterItems() {
       body: Column(
       children: [
         
-        Padding(
+        opcja == 2 ? Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -314,7 +313,7 @@ void filterItems() {
               //   padding: const EdgeInsets.only(left: 8.0),
               //   child: ElevatedButton(
               //     onPressed: _zlicz, // Wywołuje funkcję zliczającą
-              //     child: const Text('Sprawdź Powtórzenia'),
+              //     child: const Text('Testowy'),
               //   ),
               // )),
               
@@ -330,7 +329,7 @@ void filterItems() {
               )),
             ],
           ),
-        ),
+        ) : const SizedBox(),
         
         Padding(
           padding: const EdgeInsets.all(3.0),
