@@ -44,11 +44,21 @@ class DetailScreen extends StatelessWidget {
             child: Text('Tak', style: TextStyle(color: Theme.of(context).primaryColor),),
             onPressed: () {
               FirebaseFirestore.instance.collection('seriale').doc(serial.firebaseId).delete().then((value) => {
-                serialProvider.orderList.remove(serial.firebaseId),
-                serialProvider.watchedSeries.remove(serial),
-                FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
-                  'documentIds' : serialProvider.orderList,
-                })
+                if(serial.isWatched){
+                  serialProvider.orderList.remove(serial.firebaseId),
+                  serialProvider.watchedSeries.remove(serial),
+                  FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
+                    'documentIds' : serialProvider.orderList,
+                  })
+                },
+                if(serialProvider.orderToWatchList.contains(serial.firebaseId) ) {
+                  serialProvider.orderToWatchList.remove(serial.firebaseId),
+                  serialProvider.seriesToWatch.remove(serial),
+                  FirebaseFirestore.instance.collection('kolejnosc').doc('ToWatch').update({
+                    'documentIds' : serialProvider.orderToWatchList,
+                  })
+                }
+                
                 // .then((_) async {
                 // await serialProvider.fetchSerials();
                 // })

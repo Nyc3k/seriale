@@ -37,26 +37,34 @@ class _SerieslistState extends State<Serieslist> {
       widget.seriesOrder.insert(newIndex, id);
     });
 
-    // Zapisz nową kolejność w Firestore
-    FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
-        'documentIds' : widget.seriesOrder,
+    
+    if (widget.watched) {
+      // Zapisz nową kolejność w Firestore
+      FirebaseFirestore.instance.collection('kolejnosc').doc('serialeObejrzane').update({
+          'documentIds' : widget.seriesOrder,
       });
       for (var i = serialProvider.orderList.length-1; i >= 0; i--) {
-        final serial = serialProvider.watchedSeries.firstWhere((element) => element.firebaseId == serialProvider.orderList[i]);
+        final serial = serialProvider.watchedSeries.firstWhere((element) => element.firebaseId == widget.seriesOrder[i]);
         serialProvider.watchedSeries.remove(serial);
         serialProvider.watchedSeries.insert(0, serial);
       }
-    //   .then( (_) async =>
-    //   await serialProvider.fetchSerials()
-    // );
-    //_updateSeriesOrder();
+    } else {
+      // Zapisz nową kolejność w Firestore
+      FirebaseFirestore.instance.collection('kolejnosc').doc('ToWatch').update({
+          'documentIds' : widget.seriesOrder,
+      });
+      for (var i = serialProvider.orderToWatchList.length-1; i >= 0; i--) {
+        final serial = serialProvider.seriesToWatch.firstWhere((element) => element.firebaseId == widget.seriesOrder[i]);
+        serialProvider.seriesToWatch.remove(serial);
+        serialProvider.seriesToWatch.insert(0, serial);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
 
-    print(widget.opcja == 1);
-    if(widget.opcja == 1 && widget.watched){
+    if(widget.opcja == 1){
       return widget.serials.isEmpty ? const Center(child: Text('Brak seriali')):
       ReorderableListView(
         onReorder: _onReorder,

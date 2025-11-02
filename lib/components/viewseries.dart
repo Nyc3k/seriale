@@ -219,6 +219,23 @@ void filterItems() {
     );
   }
   
+  void _zlicz() {
+
+    final Map<String, int> mapaWynikow = {};
+
+    for (var element in widget.series) {
+      mapaWynikow.update(
+        element.firebaseId!,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    mapaWynikow.forEach((klucz, wartosc) {
+      print('Element "$klucz" występuje: $wartosc raz(y).');
+    });
+    
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -293,6 +310,14 @@ void filterItems() {
               //   onPressed: _showSortDialog,
               //   child: const Text('Sortuj', style: TextStyle(color: Colors.white),),
               // ),
+              // Expanded( flex: 3, child: Padding(
+              //   padding: const EdgeInsets.only(left: 8.0),
+              //   child: ElevatedButton(
+              //     onPressed: _zlicz, // Wywołuje funkcję zliczającą
+              //     child: const Text('Sprawdź Powtórzenia'),
+              //   ),
+              // )),
+              
               Expanded( flex: 3, child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: MultiChooser(

@@ -146,7 +146,7 @@ void sortSerialList(List<Serial> serialList, List<String> orderList) {
                 _widgetOptions = <Widget>[
                   ViewSeries(series: serialProvider.watchedSeries, appBarTitle: 'Obejrzane', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: false, seriesOrder: serialProvider.orderList, watched: true),
                   AddNewSeries(multiSelectTags: _fetchedTags, series: watchedSeries),
-                  ViewSeries(series: serialProvider.seriesToWatch, appBarTitle: 'Do Obejrzenia', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: true, seriesOrder: serialProvider.orderList, watched: false),
+                  ViewSeries(series: serialProvider.seriesToWatch, appBarTitle: 'Do Obejrzenia', tags: serialProvider.fetchedTags, watchedSeries: watchedSeries, withNewSessons: true, seriesOrder: serialProvider.orderToWatchList, watched: false),
                 ];
 
                 return TabBarView(

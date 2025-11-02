@@ -9,6 +9,7 @@ class SerialProvider extends ChangeNotifier {
   List<Serial> newSessonsToWatch = [];
   List<String> fetchedTags = [];
   List<String> orderList = [];
+  List<String> orderToWatchList = [];
 
   double? convertToDouble(dynamic value) {
   if (value is int) {
@@ -44,6 +45,11 @@ int? convertToInt(dynamic value) {
       final orderQuery = await FirebaseFirestore.instance
           .collection('kolejnosc')
           .doc('serialeObejrzane')
+          .get();
+
+      final orderToWatchQuery = await FirebaseFirestore.instance
+          .collection('kolejnosc')
+          .doc('ToWatch')
           .get();
 
       // Mapuj dokumenty do listy Serial
@@ -90,10 +96,17 @@ int? convertToInt(dynamic value) {
         watchedSeries.insert(0, serial);
       }
 
+      orderToWatchList = List<String>.from(orderToWatchQuery.data()!['documentIds']);
+
       seriesToWatch = serialList.where((serie) => serie.isWatched == false).toList();
       newSessonsToWatch = watchedSeries.where((serie) => serie.newSesson == true).toList();
       seriesToWatch = seriesToWatch + newSessonsToWatch;
-      seriesToWatch.sort((a,b) => b.prority!.compareTo(a.prority!));
+      //seriesToWatch.sort((a,b) => b.prority!.compareTo(a.prority!)); // Tu zmiana aby dodać kolejność dla do obejrzenia 
+      for (var i = orderToWatchList.length-1; i >= 0; i--) {
+        final serial = seriesToWatch.firstWhere((element) => element.firebaseId == orderToWatchList[i]);
+        seriesToWatch.remove(serial);
+        seriesToWatch.insert(0, serial);
+      }
 
       fetchedTags = serialList.expand((series) => series.apiGenre!).toSet().toList().cast();
 

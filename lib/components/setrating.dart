@@ -62,7 +62,6 @@ class _addAPIandRankingState extends State<SetRanking> {
     } else{
       _sliderValue = 1.0;
     }
-    
   }
 
   void buttonAction(SerialProvider serialProvider) async {
@@ -102,7 +101,13 @@ class _addAPIandRankingState extends State<SetRanking> {
               'newSesson' : sessontowatch,
               'prority': 2
             }).then((value) {
-              serialProvider.orderList.insert( selectedIndex ,value.id);
+              if (!serialProvider.orderList.contains(value.id)) {
+                serialProvider.orderList.insert( selectedIndex ,value.id);
+              } else{
+                serialProvider.orderList.remove( value.id );
+                serialProvider.orderList.insert( selectedIndex, value.id);
+              }
+              
               widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
                 'documentIds' : serialProvider.orderList,
               }).then( (_) async =>
@@ -127,13 +132,25 @@ class _addAPIandRankingState extends State<SetRanking> {
           'wachedAt' : widget.newSerial.wachedAt,
           'updatedAt' : Timestamp.now(),
       }).then((value) {
-              serialProvider.orderList.insert( selectedIndex , widget.newSerial.firebaseId!);
-              widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
-                'documentIds' : serialProvider.orderList,
-              }).then( (_) async =>
-              await serialProvider.fetchSerials()
-            );
-            });
+        if (!serialProvider.orderList.contains(widget.newSerial.firebaseId!)) {
+          serialProvider.orderList.insert( selectedIndex ,widget.newSerial.firebaseId!);
+        } else{
+          serialProvider.orderList.remove( widget.newSerial.firebaseId! );
+          serialProvider.orderList.insert( selectedIndex, widget.newSerial.firebaseId!);
+        }if (!sessontowatch) {
+          if (serialProvider.orderToWatchList.contains(widget.newSerial.firebaseId!)) {
+          serialProvider.orderToWatchList.remove( widget.newSerial.firebaseId! );
+          widget.firestore.collection('kolejnosc').doc('ToWatch').update({
+            'documentIds' : serialProvider.orderToWatchList,
+          });
+        }   
+        }
+        widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
+          'documentIds' : serialProvider.orderList,
+        }).then( (_) async =>
+        await serialProvider.fetchSerials()
+      );
+      });
       }  else {
         widget.firestore.collection('seriale').doc(widget.newSerial.firebaseId).update({
         'newSesson' : false,
@@ -141,16 +158,28 @@ class _addAPIandRankingState extends State<SetRanking> {
         'watchedSessons' : _sliderValue,
         'emote' : emote,
         'rating' : rating,
-        'wachedNewSessonAt' : widget.newSerial.wachedAt,
+        'wachedAt' : widget.newSerial.wachedAt,
         'updatedAt' : Timestamp.now(),
       }).then((value) {
-              serialProvider.orderList.insert( selectedIndex , widget.newSerial.firebaseId!);
-              widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
-                'documentIds' : serialProvider.orderList,
-              }).then( (_) async =>
-              await serialProvider.fetchSerials()
-            );
+          if (!serialProvider.orderList.contains(widget.newSerial.firebaseId!)) {
+            serialProvider.orderList.insert( selectedIndex ,widget.newSerial.firebaseId!);
+          } else{
+            serialProvider.orderList.remove( widget.newSerial.firebaseId! );
+            serialProvider.orderList.insert( selectedIndex, widget.newSerial.firebaseId!);
+          }
+          if (serialProvider.orderToWatchList.contains(widget.newSerial.firebaseId!) ) {
+            serialProvider.orderToWatchList.remove( widget.newSerial.firebaseId! );
+            widget.firestore.collection('kolejnosc').doc('ToWatch').update({
+              'documentIds' : serialProvider.orderToWatchList,
             });
+          }     
+          widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
+            'documentIds' : serialProvider.orderList,
+          }).then( (_) async =>
+          await serialProvider.fetchSerials()
+        );
+        
+        });
       }
     }
     Navigator.popUntil(context, (route) {
