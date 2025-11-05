@@ -1,16 +1,19 @@
-import 'dart:io';
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:kajecik/apikey.dart';
 import 'package:kajecik/components/fajnyprzycisk.dart';
 import 'package:kajecik/components/serial.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:excel/excel.dart';
+import 'package:kajecik/components/serial_provider.dart';
+import 'package:kajecik/components/sheetsPayload.dart';
+import 'package:provider/provider.dart';
 
 class RaportMaker extends StatefulWidget {
   final List<Serial> series;
   const RaportMaker({super.key, required this.series});
+  
 
   @override
   State<RaportMaker> createState() => _RaportMakerState();
@@ -19,60 +22,72 @@ class RaportMaker extends StatefulWidget {
 
 
 class _RaportMakerState extends State<RaportMaker> {
-
-  int? _selectedOption;
-
-  Future<void> createExcel(int rok) async {
-    // Sprawdzanie i proszenie o uprawnienia do zapisu na urządzeniu
-    if (await Permission.storage.request().isGranted) {
-
-      var excel = Excel.createExcel();
-      Sheet sheetObject = excel['Arkusz1'];
-      List<Serial> filteredList = widget.series.where((obj) {
-          return obj.wachedAt != null && obj.wachedAt!.any((timestamp) {
-            return timestamp.toDate().year == rok;
-           });
-        }).toList();
-      sheetObject.appendRow(["Title", 'Platforms', 'Emote', 'Genre', 'Rating', 'WachedAt' ,'FirebaseId']);
-      // Dodawanie danych do arkusza
-      for (var element in filteredList) {
-        sheetObject.appendRow([element.title, element.platforms,
-          element.emote,
-          element.apiGenre,
-          element.rating,
-          for(var timestamp in element.wachedAt!) DateFormat('dd MMMM yyyy').format(timestamp.toDate()).toString(),
-          element.firebaseId]);
   
-      }
-      // Pobranie lokalizacji do zapisania pliku
-      final directory = await getStoragePath();
-      final path = '${directory!}/raport$rok.xlsx';
+  int _selectedOption = DateTime.now().year;
 
-      // Zapisanie pliku Excel
-      final fileBytes = excel.save();
-      final file = File(path);
-      await file.writeAsBytes(fileBytes!);
+  Future<void> wyslijDoGoogleSheets(int nazwaArkusza, List<Serial> listaStruktur, SerialProvider serial_provider) async {
+  final String urlSkryptu = ApiKey().GSlink;
+  List<Serial> seriesToSend = listaStruktur.where((el) {
+    return el.wachedAt!.any((date){
+      return date.toDate().year == nazwaArkusza;
+    });
+  }).toList();
+  print(nazwaArkusza.toString());
+  print(seriesToSend);
+  // Stwórz obiekt payload
+  final payload = SheetsPayload(
+    sheetName: nazwaArkusza.toString(),
+    dataList: seriesToSend,
+  );
+  
+  try {
+    String jsonBody = jsonEncode(payload.toJson(serial_provider)); // Enkodowanie obiektu SheetsPayload
 
-      print("Plik Excel zapisany: $path");
+// print(jsonBody);
+    final response = await http.post(
+      Uri.parse(urlSkryptu),
+      headers: {"Content-Type": "application/json"},
+      body: jsonBody,
+    );
+    print(response.statusCode);
+    // var responseBody = jsonDecode(response.body);
+    // print(responseBody);
+    if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        if (responseBody['status'] == 'success') {
+          print("Sukces! Dane wysłane do arkusza: ${nazwaArkusza}");
+          
+        }
     }
-  }
-
-  Future<String?> getStoragePath() async {
-  if (Platform.isAndroid) {
-    // Android: używamy zewnętrznego magazynu
-    return (await getExternalStorageDirectory())?.path;
-  } else if (Platform.isIOS || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-    // iOS, MacOS, Windows, Linux: używamy wewnętrznego katalogu dokumentów
-    return (await getApplicationDocumentsDirectory()).path;
-  } else {
-    return null; // Dla innych platform, nie obsługujemy
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sukces'),
+          content: const Text('Udało się dodać do Google Sheets'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK', style: TextStyle(color: Theme.of(context).primaryColor),),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    
+  } catch (e) {
+    print("Wystąpił wyjątek: $e");
   }
 }
 
   @override
   Widget build(BuildContext context) {
+    
     DateTime now = DateTime.now(); // Pobiera bieżącą datę i czas
     int numberOfOpctions = now.year - 2023; // Pobiera bieżący rok
+    final serialProvider = Provider.of<SerialProvider>(context, listen: false);
 
     List<DropdownMenuItem<int>> options = [];
     for (var i = 0; i < numberOfOpctions; i++) {
@@ -103,7 +118,7 @@ class _RaportMakerState extends State<RaportMaker> {
             ),
             ButtonMy(
               text: 'Utwórz Raport',
-              onPressed: () => createExcel(_selectedOption!),
+              onPressed: () => wyslijDoGoogleSheets(_selectedOption!, serialProvider.serialList, serialProvider),
             )
           ],
         ),

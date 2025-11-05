@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:kajecik/components/serial_provider.dart';
+import 'package:provider/provider.dart';
 
 class Serial {
   String? firebaseId;
@@ -144,4 +147,42 @@ class Serial {
     this.userRating = userRating;
   }
 
+  Map<String, dynamic> toJson(int rok, SerialProvider serialProvider) {
+    List<Timestamp> temp = wachedAt!.where((el) => el.toDate().year == rok ).toList();
+    List<String> sformatowanaData = temp.map((Element) => DateFormat('dd.MM.yyyy').format(Element.toDate())).toList();
+    print(serialProvider.orderList);
+    print(this.firebaseId);
+    int poz = serialProvider.orderList.indexOf(this.firebaseId!);
+    print(poz);
+    
+    return{
+      'poz': poz,
+      'id_firebase':  this.firebaseId,
+      'id_api': this.apiId,
+      'wached': this.isWatched,
+      'title': this.title,
+      'tags': this.tags,
+      'platforms': this.platforms[0],
+      'emote': this.emote,
+      'imageUrl': this.imageUrl,
+      'imageUrl2': this.imageUrl2,
+      'rating': this.rating,
+      'sesons': this.sesons,
+      'notes': this.notes,
+      'trailerUrl': this.trailerUrl,
+      'createdAt': this.createdAt?.toDate().toString(),
+      'updatedAt': this.updatedAt?.toDate().toString(),
+      'releaseYear': this.releaseYear,
+      'endYear': this.endYear,
+      'plotOverview': this.plotOverview,
+      'imdbId': this.imdbId,
+      'userRating': this.userRating,
+      'criticScore': this.criticScore,
+      'apiGenre': this.apiGenre,
+      'watchedSessons': this.watchedSessons,
+      'newSesson': this.newSesson,
+      'prority': this.prority,
+      'wachedAt': sformatowanaData
+    };
+  }
 }
