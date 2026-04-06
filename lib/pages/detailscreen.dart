@@ -114,6 +114,10 @@ class DetailScreen extends StatelessWidget {
                 'updatedAt' : Timestamp.now(),
                 'prority' : 2
               }).then((_) async {
+                serialProvider.orderToWatchList.insert( 0, serial.firebaseId!);
+                FirebaseFirestore.instance.collection('kolejnosc').doc('ToWatch').update({
+                  'documentIds' : serialProvider.orderToWatchList,
+                });
                 await serialProvider.fetchSerials();
               }); 
               Navigator.of(context).pop();
@@ -133,7 +137,10 @@ class DetailScreen extends StatelessWidget {
                 'sesons': serial.sesons! + 1,
                 'updatedAt' : Timestamp.now(),
               }).then((_) async {
-                await serialProvider.fetchSerials();
+                serialProvider.orderToWatchList.insert( 0, serial.firebaseId!);
+                FirebaseFirestore.instance.collection('kolejnosc').doc('ToWatch').update({
+                  'documentIds' : serialProvider.orderToWatchList,
+                });
               }); 
               Navigator.of(context).pop();
             },

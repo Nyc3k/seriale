@@ -41,16 +41,19 @@ int? convertToInt(dynamic value) {
       final serialsQuery = await FirebaseFirestore.instance
           .collection('seriale')
           .get();
+        print('Wartość serialsQuery: ${serialsQuery.docs}');  
       
       final orderQuery = await FirebaseFirestore.instance
           .collection('kolejnosc')
           .doc('serialeObejrzane')
           .get();
+          print('Wartość orderQuery: ${orderQuery.data()}');  
 
       final orderToWatchQuery = await FirebaseFirestore.instance
           .collection('kolejnosc')
           .doc('ToWatch')
           .get();
+          print('Wartość orderToWatchQuery: ${orderToWatchQuery.data()}');  
 
       // Mapuj dokumenty do listy Serial
       serialList = serialsQuery.docs.map((doc) {
@@ -91,11 +94,13 @@ int? convertToInt(dynamic value) {
       watchedSeries = serialList.where((serie) => serie.isWatched == true).toList();
       //watchedSeries.sort((a,b) => b.rating!.compareTo(a.rating!));
       for (var i = orderList.length-1; i >= 0; i--) {
+        print('serial id z kolejności ${orderList[i]}');
         final serial = watchedSeries.firstWhere((element) => element.firebaseId == orderList[i]);
+        print('serial id pobrany ${serial.firebaseId}');
         watchedSeries.remove(serial);
         watchedSeries.insert(0, serial);
       }
-
+print('czynnosc dla obejrzanych done');
       orderToWatchList = List<String>.from(orderToWatchQuery.data()!['documentIds']);
 
       seriesToWatch = serialList.where((serie) => serie.isWatched == false).toList();
@@ -103,7 +108,9 @@ int? convertToInt(dynamic value) {
       seriesToWatch = seriesToWatch + newSessonsToWatch;
       //seriesToWatch.sort((a,b) => b.prority!.compareTo(a.prority!)); // Tu zmiana aby dodać kolejność dla do obejrzenia 
       for (var i = orderToWatchList.length-1; i >= 0; i--) {
+        print('serial id z kolejności ${orderToWatchList[i]}');
         final serial = seriesToWatch.firstWhere((element) => element.firebaseId == orderToWatchList[i]);
+        print('serial id pobrany ${serial.firebaseId}');
         seriesToWatch.remove(serial);
         seriesToWatch.insert(0, serial);
       }

@@ -16,7 +16,8 @@ class Serieslist extends StatefulWidget {
   final List<String> tags;
   final List<String> seriesOrder;
   final bool watched;
-  const Serieslist({super.key, required this.serials, required this.watchedSeries, required this.opcja, required this.withNewSessons, required this.tags, required this.seriesOrder, required this.watched});
+  final int visibility;
+  const Serieslist({super.key, required this.serials, required this.watchedSeries, required this.opcja, required this.withNewSessons, required this.tags, required this.seriesOrder, required this.watched, required this.visibility});
 
   @override
   State<Serieslist> createState() => _SerieslistState();
@@ -70,7 +71,7 @@ class _SerieslistState extends State<Serieslist> {
         onReorder: _onReorder,
         children: [
           for (final serial in widget.serials)
-            ListViewElement(serial: serial, key: ValueKey(serial.firebaseId),),
+            ListViewElement(serial: serial, key: ValueKey(serial.firebaseId), visibility: widget.visibility ),
         ],
       );
     } else {

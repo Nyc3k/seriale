@@ -255,6 +255,10 @@ class _addAPIandRankingState extends State<AddAPIandRanking> {
             'prority' : _sliderValuePrority,
             'wachedAt': []
           }).then((_) async {
+            serialProvider.orderToWatchList.insert( 0, _.id);
+            widget.firestore.collection('kolejnosc').doc('ToWatch').update({
+              'documentIds' : serialProvider.orderToWatchList,
+            });
             await serialProvider.fetchSerials();
           });
           widget.formClick();

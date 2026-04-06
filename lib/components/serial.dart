@@ -150,10 +150,10 @@ class Serial {
   Map<String, dynamic> toJson(int rok, SerialProvider serialProvider) {
     List<Timestamp> temp = wachedAt!.where((el) => el.toDate().year == rok ).toList();
     List<String> sformatowanaData = temp.map((Element) => DateFormat('dd.MM.yyyy').format(Element.toDate())).toList();
-    print(serialProvider.orderList);
-    print(this.firebaseId);
+    // print(serialProvider.orderList);
+    // print(this.firebaseId);
     int poz = serialProvider.orderList.indexOf(this.firebaseId!);
-    print(poz);
+    // print(poz);
     
     return{
       'poz': poz,

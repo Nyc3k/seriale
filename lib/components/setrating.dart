@@ -143,8 +143,7 @@ class _addAPIandRankingState extends State<SetRanking> {
           widget.firestore.collection('kolejnosc').doc('ToWatch').update({
             'documentIds' : serialProvider.orderToWatchList,
           });
-        }   
-        }
+        }}
         widget.firestore.collection('kolejnosc').doc('serialeObejrzane').update({
           'documentIds' : serialProvider.orderList,
         }).then( (_) async =>

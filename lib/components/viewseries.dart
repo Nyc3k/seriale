@@ -27,6 +27,7 @@ class _ViewSeriesState extends State<ViewSeries> {
 
   late List<Serial> filteredItems;
   late int opcja;
+  int visibility = 0;
   late String barTitle;
   List<String> choosenFilters = [];
   final List<String> _multiSelectPlatform = ['Netflix', 'Apple_TV', 'Canal_Plus', 'Disney_Plus','HBO_MAX','TVN_Player','Prime_Video','ShyShowTime','Nie_Wiem',];
@@ -102,6 +103,15 @@ void filterItems() {
         opcja = 1;
       }else{
         opcja++;
+      }
+    });
+  }
+  void changeOfvisibility(){
+    setState(() {
+      if (visibility == 1) {
+        visibility = 0;
+      }else{
+        visibility++;
       }
     });
   }
@@ -262,6 +272,10 @@ void filterItems() {
             ))),
           ),
         actions: [
+          opcja == 1 ? IconButton(
+              icon: const Icon(Icons.visibility),
+              onPressed: () => changeOfvisibility(),
+            ): const SizedBox(),
           IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () => refreszAll(serialProvider),
@@ -349,7 +363,7 @@ void filterItems() {
             ),
           ),
         ),          
-        Expanded(  child: Serieslist(serials: filteredItems, watchedSeries: widget.watchedSeries, opcja: opcja, withNewSessons: widget.withNewSessons, tags: widget.tags, seriesOrder: widget.seriesOrder, watched: widget.watched,),
+        Expanded(  child: Serieslist(serials: filteredItems, watchedSeries: widget.watchedSeries, opcja: opcja, withNewSessons: widget.withNewSessons, tags: widget.tags, seriesOrder: widget.seriesOrder, watched: widget.watched, visibility: visibility),
         ),
       ],
     ),

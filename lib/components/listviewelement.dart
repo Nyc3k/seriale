@@ -6,9 +6,11 @@ class ListViewElement extends StatelessWidget {
   const ListViewElement({
     super.key,
     required this.serial,
+    required this.visibility,
   });
 
   final Serial serial;
+  final int visibility;
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +22,11 @@ class ListViewElement extends StatelessWidget {
       },
       title: Row(
         children: [
-          Image.network(
+          visibility == 0 ? Image.network(
             serial.imageUrl!,
             fit: BoxFit.cover,
-            height: 120,
-          ),
+            height: 100, // 120
+          ): const Icon(Icons.list),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
